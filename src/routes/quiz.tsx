@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { CheckCircle2, XCircle, RotateCcw, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, XCircle, RotateCcw, ArrowRight, Settings2, Info } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { QUESTIONS } from "@/data/questions";
+import { QUESTIONS, CATEGORIES, DIFFICULTIES, type Question } from "@/data/questions";
 import { useQuiz } from "@/hooks/use-quiz";
-import { saveResult } from "@/lib/quiz";
+import { saveResult, selectQuestions, QUESTION_COUNTS, type QuizSettings } from "@/lib/quiz";
 
 export const Route = createFileRoute("/quiz")({
   head: () => ({
@@ -20,7 +21,90 @@ export const Route = createFileRoute("/quiz")({
 });
 
 function QuizPage() {
-  const quiz = useQuiz(QUESTIONS);
+  const [run, setRun] = useState<{ questions: Question[]; settings: QuizSettings; available: number; shortfall: boolean; key: number } | null>(null);
+  if (!run) {
+    return (
+      <QuizSetup
+        onStart={(settings) => setRun({ ...selectQuestions(QUESTIONS, settings), settings, key: Date.now() })}
+      />
+    );
+  }
+  return <QuizRunner key={run.key} questions={run.questions} run={run} onChangeSettings={() => setRun(null)} />;
+}
+
+function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button type="button" role="radio" aria-checked={active} onClick={onClick}
+      className={`rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition ${active ? "border-primary bg-secondary ring-2 ring-sky" : "border-border bg-card hover:border-sky hover:bg-secondary"}`}>
+      {children}
+    </button>
+  );
+}
+
+function QuizSetup({ onStart }: { onStart: (s: QuizSettings) => void }) {
+  const [settings, setSettings] = useState<QuizSettings>({ topic: "All Topics", difficulty: "All Levels", count: 10 });
+  const preview = selectQuestions(QUESTIONS, settings);
+  const set = (p: Partial<QuizSettings>) => setSettings((s) => ({ ...s, ...p }));
+  return (
+    <AppShell>
+      <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-card sm:p-8">
+        <h1 className="font-display text-2xl font-bold">Set up your quiz</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Choose what you want to practice.</p>
+
+        <fieldset className="mt-6">
+          <legend className="mb-2 text-sm font-semibold">Topic</legend>
+          <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Topic">
+            {(["All Topics", ...CATEGORIES.map((c) => c.name)] as QuizSettings["topic"][]).map((t) => (
+              <Chip key={t} active={settings.topic === t} onClick={() => set({ topic: t })}>{t}</Chip>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="mt-6">
+          <legend className="mb-2 text-sm font-semibold">Difficulty</legend>
+          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Difficulty">
+            {(["All Levels", ...DIFFICULTIES] as QuizSettings["difficulty"][]).map((d) => (
+              <Chip key={d} active={settings.difficulty === d} onClick={() => set({ difficulty: d })}>{d}</Chip>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="mt-6">
+          <legend className="mb-2 text-sm font-semibold">Number of questions</legend>
+          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Number of questions">
+            {QUESTION_COUNTS.map((n) => (
+              <Chip key={n} active={settings.count === n} onClick={() => set({ count: n })}>{n} questions</Chip>
+            ))}
+          </div>
+        </fieldset>
+
+        {preview.shortfall && preview.available > 0 && (
+          <p className="mt-5 flex gap-2 rounded-xl bg-accent p-3 text-sm text-accent-foreground" role="status">
+            <Info className="mt-0.5 h-4 w-4 shrink-0" />
+            Only {preview.available} questions match these choices, so your quiz will have {preview.available} questions.
+          </p>
+        )}
+        {preview.available === 0 && (
+          <p className="mt-5 rounded-xl bg-destructive/10 p-3 text-sm text-destructive" role="status">
+            No questions match these choices. Try another topic or difficulty.
+          </p>
+        )}
+
+        <button onClick={() => onStart(settings)} disabled={preview.available === 0}
+          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-40">
+          Start Quiz <ArrowRight className="h-4 w-4" />
+        </button>
+      </div>
+    </AppShell>
+  );
+}
+
+function QuizRunner({ questions, run, onChangeSettings }: {
+  questions: Question[];
+  run: { settings: QuizSettings; available: number; shortfall: boolean };
+  onChangeSettings: () => void;
+}) {
+  const quiz = useQuiz(questions);
   const navigate = useNavigate();
 
   if (!quiz.current) {
@@ -41,6 +125,18 @@ function QuizPage() {
   return (
     <AppShell>
       <div className="mx-auto max-w-2xl">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+          <span>{run.settings.topic} · {run.settings.difficulty}</span>
+          <button onClick={onChangeSettings} className="inline-flex items-center gap-1 font-medium text-primary hover:underline">
+            <Settings2 className="h-3.5 w-3.5" /> Change settings
+          </button>
+        </div>
+        {run.shortfall && quiz.index === 0 && !quiz.submitted && (
+          <p className="mb-4 flex gap-2 rounded-xl bg-accent p-3 text-sm text-accent-foreground">
+            <Info className="mt-0.5 h-4 w-4 shrink-0" />
+            You asked for {run.settings.count} questions, but only {run.available} match your choices.
+          </p>
+        )}
         <div className="mb-2 flex items-center justify-between text-sm">
           <span className="font-semibold">Question {quiz.index + 1} of {quiz.total}</span>
           <span className="rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">{q.category}</span>
