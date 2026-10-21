@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Trophy, RotateCcw, BookOpen } from "lucide-react";
+import { Trophy, RotateCcw, BookOpen, CheckCircle2, XCircle, ListChecks } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { loadResult, supportiveMessage, type QuizResult } from "@/lib/quiz";
 
@@ -58,6 +58,27 @@ function ResultsPage() {
             </ul>
           )}
         </div>
+        {result.review.length > 0 && (
+          <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-card">
+            <h2 className="flex items-center gap-2 font-display text-lg font-semibold"><ListChecks className="h-5 w-5 text-primary" /> Review answers</h2>
+            <ol className="mt-4 space-y-4">
+              {result.review.map((r, i) => (
+                <li key={i} className={`rounded-xl border-l-4 bg-secondary p-4 ${r.correct ? "border-success" : "border-destructive"}`}>
+                  <div className="flex items-start gap-2">
+                    {r.correct ? <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" /> : <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />}
+                    <p className="font-medium">{i + 1}. {r.question}</p>
+                  </div>
+                  <dl className="mt-3 space-y-1 text-sm">
+                    <div><dt className="inline font-semibold">Your answer: </dt>
+                      <dd className={`inline ${r.correct ? "text-success" : "text-destructive"}`}>{r.selectedIndex === null ? "Not answered" : r.options[r.selectedIndex]}</dd></div>
+                    {!r.correct && <div><dt className="inline font-semibold">Correct answer: </dt><dd className="inline text-success">{r.options[r.correctIndex]}</dd></div>}
+                  </dl>
+                  <p className="mt-2 text-sm text-muted-foreground">{r.explanation}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
         <div className="mt-6 text-center">
           <Link to="/quiz" className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground hover:brightness-125">
             <RotateCcw className="h-4 w-4" /> Try Again
