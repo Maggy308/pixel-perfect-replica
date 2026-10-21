@@ -3,6 +3,7 @@ import { useState, type ReactNode } from "react";
 import { CheckCircle2, XCircle, RotateCcw, ArrowRight, Settings2, Info } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { QUESTIONS, CATEGORIES, DIFFICULTIES, type Question } from "@/data/questions";
+import { addToHistory, summarize } from "@/lib/progress";
 import { useQuiz } from "@/hooks/use-quiz";
 import { saveResult, selectQuestions, QUESTION_COUNTS, type QuizSettings } from "@/lib/quiz";
 
@@ -120,7 +121,12 @@ function QuizRunner({ questions, run, onChangeSettings }: {
   }
 
   const q = quiz.current;
-  const finish = () => { saveResult(quiz.result()); navigate({ to: "/results" }); };
+  const finish = () => {
+    const r = { ...quiz.result(), settings: run.settings };
+    saveResult(r);
+    addToHistory(summarize(r));
+    navigate({ to: "/results" });
+  };
 
   return (
     <AppShell>

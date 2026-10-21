@@ -11,9 +11,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-sky text-sky-foreground"><Cloud className="h-5 w-5" /></span>
             AzurePrep AI
           </Link>
-          <nav className="flex gap-4 text-sm">
+          <nav className="flex gap-3 text-sm sm:gap-5">
             <Link to="/" className="opacity-80 hover:opacity-100" activeProps={{ className: "opacity-100 font-semibold" }} activeOptions={{ exact: true }}>Home</Link>
             <Link to="/quiz" className="opacity-80 hover:opacity-100" activeProps={{ className: "opacity-100 font-semibold" }}>Quiz</Link>
+            <Link to="/revision" className="opacity-80 hover:opacity-100" activeProps={{ className: "opacity-100 font-semibold" }}>Revision</Link>
+            <Link to="/progress" className="opacity-80 hover:opacity-100" activeProps={{ className: "opacity-100 font-semibold" }}>Progress</Link>
           </nav>
         </div>
       </header>

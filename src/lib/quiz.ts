@@ -28,6 +28,7 @@ export interface QuizResult {
   percentage: number;
   revisionTopics: string[];
   review: ReviewItem[];
+  settings?: QuizSettings;
 }
 
 /** Filters the bank by topic & difficulty, shuffles, and takes up to `count`. */
