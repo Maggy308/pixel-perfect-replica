@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { CheckCircle2, XCircle, RotateCcw, ArrowRight, Settings2, Info } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { QUESTIONS, CATEGORIES, DIFFICULTIES, type Question } from "@/data/questions";
@@ -32,7 +32,7 @@ function QuizPage() {
   return <QuizRunner key={run.key} questions={run.questions} run={run} onChangeSettings={() => setRun(null)} />;
 }
 
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
   return (
     <button type="button" role="radio" aria-checked={active} onClick={onClick}
       className={`rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition ${active ? "border-primary bg-secondary ring-2 ring-sky" : "border-border bg-card hover:border-sky hover:bg-secondary"}`}>
