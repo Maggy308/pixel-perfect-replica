@@ -38,7 +38,7 @@ function Index() {
         <h2 className="font-display text-2xl font-bold">Quiz categories</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           {CATEGORIES.map((c, i) => {
-            const Icon = icons[i];
+            const Icon = icons[i] ?? Cloud;
             return (
               <div key={c.name} className="rounded-2xl border border-border bg-card p-6 shadow-card">
                 <span className="grid h-11 w-11 place-items-center rounded-xl bg-accent text-accent-foreground"><Icon className="h-5 w-5" /></span>
