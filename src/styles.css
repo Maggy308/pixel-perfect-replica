@@ -159,6 +159,3 @@
 @utility shadow-card {
   box-shadow: 0 8px 24px -12px oklch(0.28 0.09 262 / 0.25);
 }
-
-@layer base {
-}
