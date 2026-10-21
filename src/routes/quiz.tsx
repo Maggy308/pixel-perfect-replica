@@ -35,7 +35,7 @@ function QuizPage() {
 function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
   return (
     <button type="button" role="radio" aria-checked={active} onClick={onClick}
-      className={`rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition ${active ? "border-primary bg-secondary ring-2 ring-sky" : "border-border bg-card hover:border-sky hover:bg-secondary"}`}>
+      className={`rounded-xl border-2 px-3 py-3 text-left text-sm font-medium break-words transition ${active ? "border-primary bg-secondary ring-2 ring-sky" : "border-border bg-card hover:border-sky hover:bg-secondary"}`}>
       {children}
     </button>
   );
